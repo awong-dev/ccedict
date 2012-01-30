@@ -14,19 +14,26 @@ import java.util.TreeMap;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class CedictActivity extends Activity {
@@ -40,7 +47,8 @@ public class CedictActivity extends Activity {
         setContentView(R.layout.main);
         
         ////// LIST VIEW
-        ListView resultPanel = (ListView)findViewById(R.id.ResultPanel);
+        final ListView resultPanel = (ListView)findViewById(R.id.ResultPanel);
+        /*
         ArrayList<String> myArrayList = new ArrayList<String>();
         myArrayList.add(new String(Environment.getExternalStorageDirectory().toString()));
         ArrayAdapter<String> adapter = new ArrayAdapter<String> (
@@ -49,6 +57,46 @@ public class CedictActivity extends Activity {
         		myArrayList);
         resultPanel.setAdapter(adapter);
         resultPanel.invalidate();
+        */
+        
+        EditText searchBox = (EditText)findViewById(R.id.SearchBox);
+        searchBox.addTextChangedListener(new TextWatcher() {
+        	 public void afterTextChanged(Editable s) { 
+        		 SQLiteDatabase db = dictionaryOpenHelper.getReadableDatabase();
+        		 SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        		 queryBuilder.setTables("Entries"); // LEFT OUTER JOIN Definitions ON (Entries.entry_id = Definitions.entry_id)");
+        		 String[] selectorArgs = {s.toString(), s.toString()};
+        		 final String where = 
+        				 "Entries." + EntrySection.SIMP + " = ?" + 
+        				 " OR Entries." + EntrySection.TRAD + " = ?";
+        		 Cursor cursor = queryBuilder.query(
+        				 db, new String[] {
+        					 "entry_id _id",
+        				     "TRAD trad",
+        				     "SIMP simp",
+        				     "CANT cant",
+        				     "MAND mand",
+        				     "DEFN defn"
+        				 },
+                		 where, selectorArgs, "_id", null, null);
+        		 Log.e("bleck", "Found: " + Integer.toString(cursor.getCount()));
+        		 SimpleCursorAdapter adapter = new SimpleCursorAdapter(
+     	                getApplicationContext(), 
+     	                R.layout.entry_layout, 
+     	                cursor, 
+     	                new String[] {"trad", "simp", "cant", "mand", "defn"}, 
+     	                new int[] {R.id.trad, R.id.simp, R.id.cant, R.id.mand, R.id.defn});
+        		 resultPanel.setAdapter(adapter);
+        		 resultPanel.invalidate();
+             }
+
+             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+             }
+
+             public void onTextChanged(CharSequence s, int start, int before, int count) {
+             }
+        });
+  
     }
     
     @Override
@@ -111,7 +159,6 @@ public class CedictActivity extends Activity {
     void loadDictionary(File dict) {
     	try {
 			SQLiteDatabase db = dictionaryOpenHelper.getWritableDatabase();
-			db.beginTransaction();
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(new FileInputStream(dict), "UTF-8"));
 			String line = null;
@@ -121,7 +168,7 @@ public class CedictActivity extends Activity {
 				EntrySection section = EntrySection.TRAD;
 				ContentValues entry = new ContentValues();
 				String[] defn = null;
-				for (int i = 0; i < line.length(); i++) {
+				line_done: for (int i = 0; i < line.length(); i++) {
 					char ch = line.charAt(i);
 					switch(section) {
 					case TRAD:
@@ -164,22 +211,15 @@ public class CedictActivity extends Activity {
 							buf.append(ch);
 						}
 						break;
-					case DEFN:
-						defn = line.substring(i).split("/");
-						break;
+					case DEFN: {
+						  entry.put(section.toString(), line.substring(i));
+						  break line_done;
+					    }
 					}
 				}
 
-				long row_id = db.insert("Entries", null, entry);
-				for (String d: defn) {
-					ContentValues definition = new ContentValues();
-					definition.put("entry_id", row_id);
-					definition.put(EntrySection.DEFN.toString(), d);
-					db.insert("Definitions", null, definition);
-				}
+				db.insert("Entries", null, entry);
 			}
-			
-			db.endTransaction();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,11 +246,14 @@ public class CedictActivity extends Activity {
         	   + EntrySection.TRAD + " TEXT, " 
         	   + EntrySection.SIMP + " TEXT, "
         	   + EntrySection.CANT + " TEXT, " 
-        	   + EntrySection.MAND + " TEXT);");
+        	   + EntrySection.MAND + " TEXT, "
+               + EntrySection.DEFN + " TEXT);");
+            /*
         	// Definitions table has one definition per row. Within each entry_id, all the def_ids should have a unique
             // sort_order.  Sort ascending.
             db.execSQL("CREATE TABLE Definitions (defn_id INTEGER PRIMARY KEY, entry_id INTEGER NOT NULL, sort_order INTEGER, "
             		+ EntrySection.DEFN + " TEXT, FOREIGN KEY(entry_id) REFERENCES Entries(entry_id));");
+            		*/
 		}
 
 		@Override

@@ -1,7 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Entry"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-    
 
-</TextView>
+    <TextView
+        android:id="@+id/trad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:textColor="#FF0000"
+        android:textStyle="bold"
+        android:text="@string/trad"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/cant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/trad"
+        android:layout_alignBaseline="@+id/trad"
+        android:layout_marginLeft="2sp"
+        android:textColor="#FF0000"
+        android:text="@string/cant"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/mand"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/simp"
+        android:layout_toRightOf="@+id/simp"
+        android:layout_marginLeft="2sp"
+        android:textColor="#00FF00"
+        android:text="@string/mand"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/defn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/simp"
+        android:text="@string/defn"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/simp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/trad"        
+        android:textColor="#00FF00"
+        android:text="@string/simp"
+        android:textSize="12sp" />
+
+</RelativeLayout>
