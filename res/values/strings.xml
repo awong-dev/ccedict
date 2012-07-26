@@ -2,14 +2,14 @@
 <resources>
 
     <string name="hello">Hello World, CedictActivity!</string>
-    <string name="app_name">Cantonese Cedict (test)</string>
+    <string name="app_name">Cantonese Cedict</string>
     <string name="Go">Go</string>
     <string name="trad">於</string>
     <string name="simp">于</string>
-    <string name="cant">yu1</string>
+    <string name="cant">yu1 yu2</string>
     <string name="mand">bei2jing1</string>
     <string name="defn">Some word.</string>
-    <string name="left_bracket">[</string>
+    <string name="left_bracket">[m: </string>
     <string name="right_bracket">]</string>
 
 </resources>

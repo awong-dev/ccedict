@@ -1,4 +1,4 @@
-package awongdev.android.ccedict;
+package awongdev.android.cedict;
 
 import android.content.ContentValues;
 import android.database.Cursor;

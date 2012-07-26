@@ -1,4 +1,4 @@
-package awongdev.android.ccedict;
+package awongdev.android.cedict;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.AsyncTask;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import awongdev.android.ccedict.R.id;
+import awongdev.android.cedict.R;
 
 final class LookupTask extends
 		AsyncTask<String, Void, Cursor> {

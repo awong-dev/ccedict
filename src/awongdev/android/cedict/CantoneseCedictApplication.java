@@ -1,4 +1,4 @@
-package awongdev.android.ccedict;
+package awongdev.android.cedict;
 
 import java.io.File;
 

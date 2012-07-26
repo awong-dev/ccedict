@@ -1,4 +1,4 @@
-package awongdev.android.ccedict;
+package awongdev.android.cedict;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -19,24 +18,17 @@ import java.util.zip.GZIPInputStream;
 import android.app.Activity;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import awongdev.android.ccedict.R;
+import awongdev.android.cedict.R;
 
 public class CantoneseCedictActivity extends Activity {
 	private final Pattern ALPHA_NUM = Pattern.compile("^[a-zA-Z0-9 ]+$");
@@ -257,7 +249,7 @@ public class CantoneseCedictActivity extends Activity {
 				ArrayList<String> pinyin = new ArrayList<String>();
 				ArrayList<ArrayList<String>> definitions = new ArrayList<ArrayList<String>>();
 
-				// Example line: ??ï¿½?[kiu4] [qiao2] /surname Qiao/tall/
+				// Example line: ??ï¿?[kiu4] [qiao2] /surname Qiao/tall/
 				EntrySection section = EntrySection.TRAD;
 
 				line_done: for (int i = 0; i < line.length(); i++) {

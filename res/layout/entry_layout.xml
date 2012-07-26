@@ -3,102 +3,94 @@
     android:id="@+id/Entry"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
-
+         
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-	            
-        <LinearLayout
-            android:id="@+id/linearLayout1"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <RelativeLayout
-                android:id="@+id/relativeLayout1"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left" >
-
-                <TextView
-                    android:id="@+id/entry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/trad"
-                    android:textColor="#FF0000"
-                    android:textSize="30sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/cantonese"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/entry"
-                    android:layout_alignBottom="@+id/entry"
-                    android:layout_marginLeft="4sp"
-                    android:layout_toRightOf="@+id/entry"
-                    android:text="@string/cant"
-                    android:textColor="#FF0000"
-                    android:textSize="18sp" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/relativeLayout2"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/variant"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/simp"
-                    android:textColor="#00FF00"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/pinyin_left_bracket"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/variant"
-                    android:layout_alignBottom="@+id/variant"
-                    android:layout_marginLeft="2sp"
-                    android:layout_toRightOf="@+id/variant"
-                    android:text="@string/left_bracket"
-                    android:textColor="#00FF00"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/pinyin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/variant"
-                    android:layout_alignBottom="@+id/variant"
-                    android:layout_toRightOf="@+id/pinyin_left_bracket"
-                    android:text="@string/mand"
-                    android:textColor="#00FF00"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/pinyin_right_bracket"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@+id/variant"
-                    android:layout_alignBottom="@+id/variant"
-                    android:layout_toRightOf="@+id/pinyin"
-                    android:text="@string/right_bracket"
-                    android:textColor="#00FF00"
-                    android:textSize="12sp" />
-            </RelativeLayout>
+            android:gravity="left" >
 
             <TextView
-                android:id="@+id/definition"
-                android:layout_width="fill_parent"
+                android:id="@+id/entry"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/defn"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:text="@string/trad"
+                android:textColor="#FF0000"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+            
+            <TextView
+                android:id="@+id/variant"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/entry"
+                android:layout_marginLeft="4sp"
+                android:layout_toRightOf="@+id/entry"
+                android:text="@string/simp"
+                android:textColor="#00FF00"
+                android:textSize="16sp" />
+        </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/relativeLayout2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/cantonese"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cant"
+                android:textColor="#FF0000"
+                android:textSize="14sp" />
+            
+            <TextView
+                android:id="@+id/pinyin_left_bracket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/cantonese"
+                android:layout_alignBottom="@+id/cantonese"
+                android:layout_marginLeft="4sp"
+                android:layout_toRightOf="@+id/cantonese"
+                android:text="@string/left_bracket"
+                android:textColor="#00dd00"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/pinyin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/cantonese"
+                android:layout_alignBottom="@+id/cantonese"
+                android:layout_toRightOf="@+id/pinyin_left_bracket"
+                android:text="@string/mand"
+                android:textColor="#00dd00"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/pinyin_right_bracket"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/cantonese"
+                android:layout_alignBottom="@+id/cantonese"
+                android:layout_toRightOf="@+id/pinyin"
+                android:text="@string/right_bracket"
+                android:textColor="#00dd00"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/definition"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/defn"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </RelativeLayout>

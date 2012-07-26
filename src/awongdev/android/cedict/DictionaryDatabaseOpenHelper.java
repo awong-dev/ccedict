@@ -1,10 +1,9 @@
-package awongdev.android.ccedict;
+package awongdev.android.cedict;
 
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import awongdev.android.ccedict.CantoneseCedictActivity.EntrySection;
 
 public class DictionaryDatabaseOpenHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 2;
