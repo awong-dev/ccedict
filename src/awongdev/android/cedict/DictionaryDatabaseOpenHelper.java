@@ -9,7 +9,7 @@ public class DictionaryDatabaseOpenHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 2;
 
     DictionaryDatabaseOpenHelper(String name, Context context) {
-        super(context, context.getDatabasePath(name).getAbsolutePath(), null, DATABASE_VERSION);
+        super(context, name, null, DATABASE_VERSION);
     }
     
     @Override
