@@ -1,9 +1,12 @@
 package awongdev.android.cedict;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 public class DictionaryUpdater{
@@ -13,6 +16,31 @@ public class DictionaryUpdater{
 		database = db;
 	}
 
+	public void updateFromCcedict(String sourceId, BufferedReader reader) throws IOException {
+		database.beginTransaction();
+		try {
+			updateFromReaderInternal(sourceId, reader);
+			database.setTransactionSuccessful();
+		} finally {
+			database.endTransaction();
+		}
+	}
+	
+	public void replaceWithSqlDump(BufferedReader reader) throws IOException {
+		try {
+			database.beginTransaction();
+			try { database.execSQL("DROP TABLE FlattenedEntries;"); } catch (SQLException e) {}
+			try { database.execSQL("DROP TABLE Entries;"); } catch (SQLException e) {}
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				database.execSQL(line);
+			}
+			database.setTransactionSuccessful();
+		} finally {
+			database.endTransaction();
+		}
+	}
+	
 	private void upsertDefinitions(long source_id, long entry_id,
 			ArrayList<ArrayList<String>> definitions) {
 		database.delete("Definitions", "entry_id = ? and source_id = ?",
@@ -228,6 +256,101 @@ public class DictionaryUpdater{
 				+ ", UNIQUE (entry_id)"
 				+ ")");
 		} catch (Exception e) {
+		}
+	}
+
+	static enum EntrySection {
+		TRAD, SIMP, CANT, MAND, DEFN
+	}
+	
+	private void updateFromReaderInternal(String sourceId, BufferedReader reader) throws IOException {
+		String line = null;
+		
+		long source_id = sourceIdForName(sourceId);
+		if (source_id == -1) {
+			source_id = addSource(sourceId, DictionaryUpdater.TrustLevel.FULL_TRUST);
+		}
+	
+		while ((line = reader.readLine()) != null) {
+			StringBuilder buf = new StringBuilder(1024);
+			String traditional = null;
+			String simplified = null;
+			ArrayList<String> jyutping = new ArrayList<String>();
+			ArrayList<String> pinyin = new ArrayList<String>();
+			ArrayList<ArrayList<String>> definitions = new ArrayList<ArrayList<String>>();
+	
+			// Example line: ??�?[kiu4] [qiao2] /surname Qiao/tall/
+			EntrySection section = EntrySection.TRAD;
+	
+			line_done: for (int i = 0; i < line.length(); i++) {
+				char ch = line.charAt(i);
+				switch (section) {
+				case TRAD:
+					if (ch == ' ') {
+						traditional = buf.toString();
+						buf.setLength(0);
+						section = EntrySection.SIMP;
+					} else {
+						buf.append(ch);
+					}
+					break;
+				case SIMP:
+					if (ch == ' ') {
+						simplified = buf.toString();
+						buf.setLength(0);
+						section = EntrySection.CANT;
+					} else {
+						buf.append(ch);
+					}
+					break;
+				case CANT:
+					if (ch == '[') {
+						// ignore
+					} else if (ch == ']') {
+						for (String s : buf.toString().split("\\|")) {
+							s = s.trim();
+							if (s.length() != 0) {
+								jyutping.add(s);
+							}
+						}
+						buf.setLength(0);
+						section = EntrySection.MAND;
+					} else {
+						buf.append(ch);
+					}
+					break;
+				case MAND:
+					if (ch == '[') {
+						// ignore
+					} else if (ch == ']') {
+						for (String s : buf.toString().split("\\|")) {
+							s = s.trim();
+							if (s.trim().length() != 0) {
+								pinyin.add(s);
+							}
+						}
+						buf.setLength(0);
+						section = EntrySection.DEFN;
+					} else {
+						buf.append(ch);
+					}
+					break;
+				case DEFN:
+					for (String single_definition : line.substring(i).split("/")) {
+						single_definition = single_definition.trim();
+						if (single_definition.length() == 0) {
+							continue;
+						}
+						ArrayList<String> major_def = new ArrayList<String>();
+						major_def.add(single_definition);
+						definitions.add(major_def);
+	
+					}
+					break line_done;
+				}
+			}
+			upsertEntry(source_id, traditional, definitions, pinyin, jyutping);
+			upsertEntry(source_id, simplified, definitions, pinyin, jyutping);
 		}
 	}
 

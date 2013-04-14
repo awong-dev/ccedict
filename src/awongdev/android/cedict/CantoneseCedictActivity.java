@@ -11,7 +11,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -76,15 +78,14 @@ public class CantoneseCedictActivity extends Activity {
 					// Increment lookup frequency.
 					outstanding_increment = new IncrementLookup(database);
 					Handler handler = new Handler();
-					handler.postDelayed(new Runnable()
-					{
-						final IncrementLookup existing_task = outstanding_increment; 
-					     public void run()
-					     {
-					    	 if (!existing_task.isCancelled()) {
-					    		 existing_task.execute(term);
-					    	 }
-					     }
+					handler.postDelayed(new Runnable() {
+						final IncrementLookup existing_task = outstanding_increment;
+
+						public void run() {
+							if (!existing_task.isCancelled()) {
+								existing_task.execute(term);
+							}
+						}
 					}, 1000);
 				}
 			}
@@ -113,12 +114,69 @@ public class CantoneseCedictActivity extends Activity {
 		case R.id.Load:
 			new Thread(new Runnable() {
 				public void run() {
-					loadDictionaryDir();
+		//			loadDictionaryDir();
+					verifyAndLoadDictionaryFile();
 				}
 			}).start();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private static String bytesToHex(byte[] bytes) {
+	    final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	    char[] hexChars = new char[bytes.length * 2];
+	    int v;
+	    for ( int j = 0; j < bytes.length; j++ ) {
+	        v = bytes[j] & 0xFF;
+	        hexChars[j * 2] = hexArray[v >>> 4];
+	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+	    }
+	    return new String(hexChars);
+	}
+	
+	void verifyAndLoadDictionaryFile() {
+		File filename = new File("/sdcard/b9eb6874b3a4fcea767ca2b0a288cef2e612946b.u8.db.gz");
+		DigestInputStream instream = null;
+		try {
+			try {
+				final int BUFFER_SIZE = 4096;
+				database.beginTransaction();
+				
+				MessageDigest md = MessageDigest.getInstance("SHA-1");				
+				instream = new DigestInputStream(
+						new GZIPInputStream(new BufferedInputStream(
+								new FileInputStream(filename), BUFFER_SIZE)),
+						md);
+				
+			 
+//			    updateDatabaseFromStream(new InputStreamReader(instream));
+			 
+			    String hash = bytesToHex(md.digest());
+				System.err.println("Digest: " + hash);
+			    if (hash.equals("the right part of the filename")) {
+			    	database.setTransactionSuccessful();
+			    } else {
+			    	// TODO(awong): Log an error here. Signal to user.
+			    }
+			 
+				
+			} catch (NoSuchAlgorithmException nsae) {
+				// TODO Auto-generated catch block
+				nsae.printStackTrace();
+			} finally {
+				database.endTransaction();
+				if (instream != null) {
+					instream.close();
+				}
+    		}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -155,14 +213,14 @@ public class CantoneseCedictActivity extends Activity {
 			if (dict.canRead()) {
 				//loadDictionary(dict);
 				//loadSqlDump(dict);
-				replaceDatabase(dict);
+				overwriteDatabase(dict);
 			} else {
 				// TODO(awong): List error.
 			}
 		}
 	}
 	
-	void replaceDatabase(File dict) {
+	void overwriteDatabase(File dict) {
 		BufferedOutputStream myOutput = null;
 		GZIPInputStream is = null;
 		try {
@@ -194,148 +252,34 @@ public class CantoneseCedictActivity extends Activity {
 	}
 	
 	void loadSqlDump(File dict) {
-		SQLiteDatabase db = (new DictionaryDatabaseOpenHelper("dictionary",
-				getApplicationContext())).getWritableDatabase();
 		try {
-			try { db.execSQL("DROP TABLE FlattenedEntries;"); } catch (SQLException e) {}
-			try { db.execSQL("DROP TABLE Entries;"); } catch (SQLException e) {}
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					new GZIPInputStream(new BufferedInputStream(new FileInputStream(dict))), "UTF-8"));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				db.execSQL(line);
-			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			BufferedReader reader = openFile(dict);
+			DictionaryUpdater updater = new DictionaryUpdater(database);
+			updater.replaceWithSqlDump(reader);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			db.close();
+			new RuntimeException(e);
 		}
 	}
 
-	static enum EntrySection {
-		TRAD, SIMP, CANT, MAND, DEFN
-	};
-
-	void loadDictionary(File dict) {
-		SQLiteDatabase db = (new DictionaryDatabaseOpenHelper("dictionary",
-				getApplicationContext())).getWritableDatabase();
+	void updateDictionaryFromCcedict(File dict) {
 		try {
-			db.beginTransaction();
-			DictionaryUpdater updater = new DictionaryUpdater(db);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					new FileInputStream(dict), "UTF-8"));
-			String line = null;
-			
-			long source_id = updater.sourceIdForName(dict.getName());
-			if (source_id == -1) {
-				source_id = updater.addSource(dict.getName(), DictionaryUpdater.TrustLevel.FULL_TRUST);
-			}
-
-			while ((line = reader.readLine()) != null) {
-				StringBuilder buf = new StringBuilder(1024);
-				String traditional = null;
-				String simplified = null;
-				ArrayList<String> jyutping = new ArrayList<String>();
-				ArrayList<String> pinyin = new ArrayList<String>();
-				ArrayList<ArrayList<String>> definitions = new ArrayList<ArrayList<String>>();
-
-				// Example line: ??ï¿?[kiu4] [qiao2] /surname Qiao/tall/
-				EntrySection section = EntrySection.TRAD;
-
-				line_done: for (int i = 0; i < line.length(); i++) {
-					char ch = line.charAt(i);
-					switch (section) {
-					case TRAD:
-						if (ch == ' ') {
-							traditional = buf.toString();
-							buf.setLength(0);
-							section = EntrySection.SIMP;
-						} else {
-							buf.append(ch);
-						}
-						break;
-					case SIMP:
-						if (ch == ' ') {
-							simplified = buf.toString();
-							buf.setLength(0);
-							section = EntrySection.CANT;
-						} else {
-							buf.append(ch);
-						}
-						break;
-					case CANT:
-						if (ch == '[') {
-							// ignore
-						} else if (ch == ']') {
-							for (String s : buf.toString().split("\\|")) {
-								s = s.trim();
-								if (s.length() != 0) {
-									jyutping.add(s);
-								}
-							}
-							buf.setLength(0);
-							section = EntrySection.MAND;
-						} else {
-							buf.append(ch);
-						}
-						break;
-					case MAND:
-						if (ch == '[') {
-							// ignore
-						} else if (ch == ']') {
-							for (String s : buf.toString().split("\\|")) {
-								s = s.trim();
-								if (s.trim().length() != 0) {
-									pinyin.add(s);
-								}
-							}
-							buf.setLength(0);
-							section = EntrySection.DEFN;
-						} else {
-							buf.append(ch);
-						}
-						break;
-					case DEFN:
-						for (String single_definition : line.substring(i).split("/")) {
-							single_definition = single_definition.trim();
-							if (single_definition.length() == 0) {
-								continue;
-							}
-							ArrayList<String> major_def = new ArrayList<String>();
-							major_def.add(single_definition);
-							definitions.add(major_def);
-
-						}
-						break line_done;
-					}
-				}
-				updater.upsertEntry(source_id, traditional, definitions, pinyin, jyutping);
-				updater.upsertEntry(source_id, simplified, definitions, pinyin, jyutping);
-			}
-			
-			db.setTransactionSuccessful();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			BufferedReader reader = openFile(dict);
+			DictionaryUpdater updater = new DictionaryUpdater(database);
+			updater.updateFromCcedict(dict.getName(), reader);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			db.endTransaction();
-			db.close();
+			new RuntimeException(e);
 		}
+	}
+	
+	private BufferedReader openFile(File file) {
+		try {
+			return new BufferedReader(new InputStreamReader(
+					new FileInputStream(file), "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			new RuntimeException(e);
+		} catch (FileNotFoundException e) {
+			new RuntimeException(e);
+		}
+		return null;
 	}
 }
