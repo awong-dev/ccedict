@@ -2,18 +2,19 @@ package awongdev.android.cedict.database;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import awongdev.android.cedict.CantoneseCedictActivity;
+import awongdev.android.cedict.database.DictionaryTaskManager.DictionaryTaskManagerInitListener;
 
-public class InitializeDatabasesTask extends AsyncTask<Context, Integer, Dictionary> {
-	private final CantoneseCedictActivity activity;
+class InitializeDatabasesTask extends AsyncTask<Void, Integer, Dictionary> {
+	private final DictionaryTaskManagerInitListener listener;
+	private final Context context;
 	
-	public InitializeDatabasesTask (CantoneseCedictActivity activity) {
-		this.activity = activity;
+	InitializeDatabasesTask(DictionaryTaskManagerInitListener listener, Context context) {
+		this.listener = listener;
+		this.context = context;
 	}
 	
 	@Override
-	protected Dictionary doInBackground(Context... params) {
-		Context context = params[0];
+	protected Dictionary doInBackground(Void... params) {
 		Dictionary dictionary = new Dictionary(context);
 		// TODO(awong): Set 100ms timer to show splash screen of initialize doesn't complete.
 		dictionary.initializeDatabases();
@@ -22,11 +23,11 @@ public class InitializeDatabasesTask extends AsyncTask<Context, Integer, Diction
 
 	@Override
 	protected void onProgressUpdate(Integer... progress) {
-		activity.showInitializing();
+		// listener.showInitializing();
 	}
 	
 	@Override
 	protected void onPostExecute(Dictionary d) {
-		activity.assignDictionary(d);
+		listener.onInitialized(new DictionaryTaskManager(context, d));
 	}
 }

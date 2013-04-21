@@ -20,7 +20,6 @@ public class CantoneseCedictApplication extends Application {
 	
 	@Override
 	public synchronized File getDatabasePath(String name) {
-		
 		return new File(DatabaseUtil.getDatabaseDir(this), name);
 	}
 	

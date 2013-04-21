@@ -1,21 +1,18 @@
-package awongdev.android.cedict;
+package awongdev.android.cedict.database;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.AsyncTask;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import awongdev.android.cedict.R;
-import awongdev.android.cedict.database.Dictionary;
 
-public class FlashCardTask extends AsyncTask<Void, Void, Cursor> {
+public class LookupStatsTask extends AsyncTask<Void, Void, Cursor> {
 	private final ListView resultPanel;
 	private final Context applicationContext;
 	private final Dictionary dictionary;
 
-	FlashCardTask(Context context, ListView resultPanel, Dictionary dictionary) {
+	public LookupStatsTask(Context context, ListView resultPanel, Dictionary dictionary) {
 		this.applicationContext = context;
 		this.resultPanel = resultPanel;
 		this.dictionary = dictionary;
@@ -25,13 +22,7 @@ public class FlashCardTask extends AsyncTask<Void, Void, Cursor> {
 	
 	@Override
 	protected Cursor doInBackground(Void... arg0) {
-		SQLiteDatabase database = dictionary.getAnnotationsDatabase();
-		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
-		lookupQuery.setTables("Annotations");
-		
-		return lookupQuery.query(database,
-				new String[] {"rowid _id", "entry", "num_lookups", "last_lookup"}, "",
-				null, null, null, "num_lookups desc, last_lookup desc");
+		return dictionary.lookupStats();
 	}
 	
 	protected void onPostExecute(Cursor cursor) {

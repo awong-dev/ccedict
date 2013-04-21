@@ -9,10 +9,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
-public class DictionaryUpdater{
+class DictionaryUpdater{
 	private SQLiteDatabase database;
 
-	public DictionaryUpdater(SQLiteDatabase db) {
+	DictionaryUpdater(SQLiteDatabase db) {
 		database = db;
 	}
 

@@ -4,10 +4,10 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class AnnotationsDatabaseOpenHelper extends SQLiteOpenHelper {
+class AnnotationsDatabaseOpenHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
-    public AnnotationsDatabaseOpenHelper(String name, Context context) {
+    AnnotationsDatabaseOpenHelper(String name, Context context) {
         super(context, name, null, DATABASE_VERSION);
     }
     

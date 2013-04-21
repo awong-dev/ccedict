@@ -1,4 +1,4 @@
-package awongdev.android.cedict.database;
+package awongdev.android.cedict;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -20,18 +20,19 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import awongdev.android.cedict.CantoneseCedictActivity;
-import awongdev.android.cedict.HexUtil;
+import awongdev.android.cedict.database.DatabaseUtil;
+import awongdev.android.cedict.database.DictionaryTaskManager;
 
 public class DownloadDatabaseTask extends AsyncTask<Void, Integer, File> {
 	private static final String LOG_TAG = DownloadDatabaseTask.class.getCanonicalName();
 	private final String BASE_URL = "http://awong-dev.github.io/ccedict/dictionaries/";
 	private final String DOWNLOAD_DIR = "downloaded";
 	private final CantoneseCedictActivity activity;
+	private final DictionaryTaskManager dictionaryTaskManager;
 	
-	public DownloadDatabaseTask(CantoneseCedictActivity activity) {
+	public DownloadDatabaseTask(CantoneseCedictActivity activity, DictionaryTaskManager dictionaryTaskManager) {
 		this.activity = activity;
-		activity.getApplicationContext();
+		this.dictionaryTaskManager = dictionaryTaskManager;
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, Integer, File> {
 	
 	@Override
 	protected void onPostExecute(File newDictionaryPath) {
-		activity.loadNewDictionary(newDictionaryPath);
+		dictionaryTaskManager.doLoadNewDictionary(newDictionaryPath);
 	}
 
 	private File downloadDictionary(DownloadMetadata metadata) {

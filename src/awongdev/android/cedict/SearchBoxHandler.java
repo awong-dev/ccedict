@@ -3,37 +3,29 @@ package awongdev.android.cedict;
 import java.util.regex.Pattern;
 
 import android.content.Context;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.ListView;
-import awongdev.android.cedict.database.Dictionary;
+import awongdev.android.cedict.database.DictionaryTaskManager;
 
 final class SearchBoxHandler implements TextWatcher {
 	private static final Pattern ALPHA_NUM = Pattern.compile("^[a-zA-Z0-9 ]+$");
-	private final Context applicationContext;
 	private final ListView resultPanel;
-	private final Dictionary dictionary;
-	private IncrementLookup outstandingIncrement = null;
+	private final DictionaryTaskManager dictionaryTaskManager;
 	
-	public SearchBoxHandler(Context applicationContext, ListView resultPanel, Dictionary dictionary) {
-		this.applicationContext = applicationContext;
+	public SearchBoxHandler(Context applicationContext, ListView resultPanel, DictionaryTaskManager dictionaryTaskManager) {
 		this.resultPanel = resultPanel;
-		this.dictionary = dictionary;
+		this.dictionaryTaskManager = dictionaryTaskManager;
 	}
 	
 	public void afterTextChanged(Editable s) {
 		final String term = s.toString().trim();
-		if (outstandingIncrement != null) {
-			outstandingIncrement.cancel(true);
-			outstandingIncrement = null;
-		}
 		if (term.length() == 0)
 			return;
 		
 		// Special keyword to go to flashcard mode.
 		if (term.equals("hs")) {
-			new FlashCardTask(applicationContext, resultPanel, dictionary).execute();
+			dictionaryTaskManager.doStatsLookup(resultPanel);
 			return;
 		}
 		boolean is_roman = false;
@@ -43,21 +35,7 @@ final class SearchBoxHandler implements TextWatcher {
 				return;
 			is_roman = true;
 		}
-		new LookupTask(applicationContext, is_roman, resultPanel, dictionary).execute(term);
-		if (!is_roman) {
-			// Increment lookup frequency.
-			outstandingIncrement = new IncrementLookup(dictionary);
-			Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				final IncrementLookup existing_task = outstandingIncrement;
-
-				public void run() {
-					if (!existing_task.isCancelled()) {
-						existing_task.execute(term);
-					}
-				}
-			}, 1000);
-		}
+		dictionaryTaskManager.doLookup(term, is_roman, resultPanel);
 	}
 
 	public void beforeTextChanged(CharSequence arg0, int arg1,

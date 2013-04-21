@@ -4,7 +4,7 @@ import java.io.File;
 
 import android.os.AsyncTask;
 
-public class OverwriteDictionaryTask extends AsyncTask<Dictionary, Void, Void> {
+class OverwriteDictionaryTask extends AsyncTask<Dictionary, Void, Void> {
 	private final File newDictionaryPath;
 
 	public OverwriteDictionaryTask(File newDictionaryPath) {
@@ -13,7 +13,7 @@ public class OverwriteDictionaryTask extends AsyncTask<Dictionary, Void, Void> {
 
 	@Override
 	protected Void doInBackground(Dictionary... params) {
-		params[0].overwriteDatabaseFile(newDictionaryPath);
+		params[0].replaceDictionary(newDictionaryPath);
 		return null;
 	}
 }
