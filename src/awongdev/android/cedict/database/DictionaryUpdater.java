@@ -1,4 +1,4 @@
-package awongdev.android.cedict;
+package awongdev.android.cedict.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -178,72 +178,8 @@ public class DictionaryUpdater{
 	}
 	
 	void createSchema() {
-		try {
 		database.execSQL("CREATE TABLE Entries (entry_id INTEGER PRIMARY KEY AUTOINCREMENT, entry TEXT NOT NULL"
 				+ ", UNIQUE(entry))");
-		} catch (Exception e) {
-		}
-		/*
-		// priority defines which source to use first when displaying the short-form
-		// of the definitions.
-		// trust is how much we believe this source. 1 is full trust. 2 is partial trust.
-		// 3 is don't trust. 4 is unsure trust (eg., self entered).
-		// remote_source_id is used for mapping a remotely retrieved source into an
-		// internal ID number.  This is used to aid in updating a source.
-		database.execSQL("CREATE TABLE Sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT"
-				+ ", remote_source_id TEXT"
-				+ ", source_name TEXT"
-				+ ", priority INTEGER NOT NULL"
-				+ ", trust INTEGER NOT NULL"
-				+ ", UNIQUE (remote_source_id)"
-				+ ", UNIQUE (priority)"
-				+ ", UNIQUE (source_name)"
-				+ ")");
-		addSource("_INVALID_", 1999999, TrustLevel.DISTRUST, -1);
-		addSource("inferred", 999999, TrustLevel.DISTRUST, 0);
-
-		// Each definition_id represents one "major" definition.  There may be
-		// multiple minor definitions per major definition.  The sort order is
-		// based on minor_sort_order in an ascending fashion.
-		database.execSQL("CREATE TABLE Definitions (entry_id INTEGER NOT NULL"
-				   + ", source_id INTEGER NOT NULL"
-				   + ", major_id INTEGER NOT NULL"
-				   + ", minor_id INTEGER NOT NULL"
-				   + ", definition TEXT NOT NULL"
-				   + ", FOREIGN KEY (entry_id) REFERENCES Entries(entry_id)"
-				   + ", FOREIGN KEY (source_id) REFERENCES Sources(source_id)"
-				   + ", UNIQUE (entry_id,source_id,major_id,minor_id)"
-				   + ")");
-	
-		database.execSQL("CREATE TABLE Pinyin (entry_id INTEGER NOT NULL"
-				   + ", source_id INTEGER NOT NULL"
-				   + ", sort_order INTEGER NOT NULL"
-				   + ", pinyin TEXT NOT NULL"
-				   + ", FOREIGN KEY (entry_id) REFERENCES Entries(entry_id)"
-				   + ", FOREIGN KEY (source_id) REFERENCES Sources(source_id)"
-				   + ", UNIQUE (entry_id, source_id, sort_order)"
-				   + ")");
-	
-		database.execSQL("CREATE TABLE Jyutping (entry_id INTEGER NOT NULL"
-				   + ", source_id INTEGER NOT NULL"
-				   + ", sort_order INTEGER NOT NULL"
-				   + ", jyutping TEXT NOT NULL"
-				   + ", FOREIGN KEY (entry_id) REFERENCES Entries(entry_id)"
-				   + ", FOREIGN KEY (source_id) REFERENCES Sources(source_id)"
-				   + ", UNIQUE (entry_id, source_id, sort_order)"
-				   + ")");
-				   */
-		
-		try {
-		database.execSQL("CREATE TABLE Annotations (entry TEXT NOT NULL"
-				   + ", num_lookups INTEGER NOT NULL"
-				   + ", last_lookup INTEGER NOT NULL"
-				   + ", star INTEGER"
-				   + ", UNIQUE (entry)"
-				   + ")");
-		} catch (Exception e) {
-		}
-		try {	
 		database.execSQL("CREATE TABLE FlattenedEntries (entry_id INTEGER NOT NULL"
 				+ ", entry TEXT NOT NULL"
 				+ ", variant TEXT NOT NULL"
@@ -253,10 +189,7 @@ public class DictionaryUpdater{
 				+ ", definition TEXT NOT NULL"
 				+ ", extra_search TEXT"
 				+ ", FOREIGN KEY (entry_id) REFERENCES Entries(entry_id)"
-				+ ", UNIQUE (entry_id)"
-				+ ")");
-		} catch (Exception e) {
-		}
+				+ ", UNIQUE (entry_id)" + ")");
 	}
 
 	static enum EntrySection {

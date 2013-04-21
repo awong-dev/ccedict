@@ -8,12 +8,9 @@ import android.os.AsyncTask;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import awongdev.android.cedict.R;
+import awongdev.android.cedict.database.Dictionary;
 
-final class LookupTask extends
-		AsyncTask<String, Void, Cursor> {
-	/**
-	 * 
-	 */
+final class LookupTask extends AsyncTask<String, Void, Cursor> {
 	private final String where;
 	private final ListView resultPanel;
 	static final int[] TO_FIELDS = new int[] { R.id.entry, R.id.variant, R.id.cantonese,
@@ -25,18 +22,18 @@ final class LookupTask extends
 	static final String WHERE_ROMAN =
 	" (pinyin >= ? AND pinyin < ?)" +
 	" OR (extra_search >= ? AND extra_search < ?)";
-	Context applicationContext;
-	private SQLiteDatabase database;
+	private final Context applicationContext;
+	private final Dictionary dictionary;
 	
 	static final String WHERE =
 			"(entry >= ? AND entry < ?)" +
 			" OR (variant >= ? AND variant < ?)";
 
-	LookupTask(Context context, boolean is_roman, ListView resultPanel, SQLiteDatabase database) {
+	LookupTask(Context context, boolean is_roman, ListView resultPanel, Dictionary dictionary) {
 		this.applicationContext = context;
 		this.where = is_roman ? WHERE_ROMAN : WHERE;
 		this.resultPanel = resultPanel;
-		this.database = database;
+		this.dictionary = dictionary;
 	}
 	
 	/// Find the next successor string by incrementing the unicode codepoint for the last character. Won't work
@@ -57,6 +54,7 @@ final class LookupTask extends
 	}
 
 	protected Cursor doInBackground(String... term) {
+		SQLiteDatabase database = dictionary.getDictionaryDatabase();
 		String term_inc = increment(term[0]);
 		String[] selectorArgs = {
 				term[0], term_inc,

@@ -8,22 +8,24 @@ import android.os.AsyncTask;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import awongdev.android.cedict.R;
+import awongdev.android.cedict.database.Dictionary;
 
 public class FlashCardTask extends AsyncTask<Void, Void, Cursor> {
 	private final ListView resultPanel;
-	Context applicationContext;
-	private SQLiteDatabase database;
+	private final Context applicationContext;
+	private final Dictionary dictionary;
 
-	FlashCardTask(Context context, ListView resultPanel, SQLiteDatabase database) {
+	FlashCardTask(Context context, ListView resultPanel, Dictionary dictionary) {
 		this.applicationContext = context;
 		this.resultPanel = resultPanel;
-		this.database = database;
+		this.dictionary = dictionary;
 	}
 	static final int[] TO_FIELDS = new int[] { R.id.entry, R.id.variant, R.id.cantonese};
 	static final String[] VIEW_COLUMNS = new String[] { "entry", "last_lookup", "num_lookups"};
 	
 	@Override
 	protected Cursor doInBackground(Void... arg0) {
+		SQLiteDatabase database = dictionary.getAnnotationsDatabase();
 		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
 		lookupQuery.setTables("Annotations");
 		

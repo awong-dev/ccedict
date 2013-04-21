@@ -4,15 +4,17 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import awongdev.android.cedict.database.Dictionary;
 
 public class IncrementLookup extends AsyncTask<String, Void, Void> {
-	SQLiteDatabase database;
-	IncrementLookup(SQLiteDatabase database) {
-		this.database = database;
+	Dictionary dictionary;
+	IncrementLookup(Dictionary dictionary) {
+		this.dictionary = dictionary;
 	}
 
 	@Override
 	protected Void doInBackground(String... entry) {
+		SQLiteDatabase database = dictionary.getAnnotationsDatabase();
 		if (this.isCancelled()) {
 			return null;
 		}
