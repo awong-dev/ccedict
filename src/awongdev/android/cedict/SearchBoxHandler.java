@@ -23,7 +23,7 @@ final class SearchBoxHandler implements TextWatcher {
 		if (term.length() == 0)
 			return;
 		
-		// Special keyword to go to flashcard mode.
+		// Special keyword to go to stats mode.
 		if (term.equals("hs")) {
 			dictionaryTaskManager.doStatsLookup(resultPanel);
 			return;

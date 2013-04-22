@@ -24,19 +24,42 @@ public class DictionaryTaskManager {
 	private LookupTask outstandingLookup;
 	private LookupStatsTask flashCardTask;
 	
-	public static interface DictionaryTaskManagerInitListener {
-		void onInitialized(DictionaryTaskManager dtm);
+	public static class DetailedProgress {
+		public DetailedProgress(String status) {
+			this.status = status;
+			this.progress = -1;
+			this.max = -1;
+		}
+		
+		public DetailedProgress(String status, int progress, int max) {
+			this.status = status;
+			this.progress = progress;
+			this.max = max;
+		}
+		public final String status;
+		public final int progress;
+		public final int max;
 	}
 	
-	public static void asyncCreate(DictionaryTaskManagerInitListener listener, Context context) {
-		new InitializeDatabasesTask(listener, context).execute();
+	public static interface TaskProgressListener<Progress, Result> {
+		void onBegin(Progress initialStatus);
+		void onProgress(Progress progress);
+		void onComplete(Result dtm);
+	}	
+	
+	public static void asyncCreate(TaskProgressListener<String, DictionaryTaskManager> listener, Context context, Handler handler) {
+		new InitializeDatabasesTask(listener, context, handler).execute();
 	}
 
-	DictionaryTaskManager(Context context, Dictionary dictionary) {
+	DictionaryTaskManager(Context context, Dictionary dictionary, Handler handler) {
 		this.context = context;
 		this.dictionary = dictionary;
-		this.handler = new Handler();
+		this.handler = handler;
 	}	
+	
+	public void doDownloadLatestDictionary(TaskProgressListener<DetailedProgress, Void> listener) {
+		new DownloadDatabaseTask(context, dictionary, listener).execute();
+	}
 	
 	public void doLoadNewDictionary(final File newDictionaryPath) {
 		new OverwriteDictionaryTask(newDictionaryPath).execute(dictionary);

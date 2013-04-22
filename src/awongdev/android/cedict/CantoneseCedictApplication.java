@@ -27,6 +27,7 @@ public class CantoneseCedictApplication extends Application {
 	public synchronized SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
 		File path = getDatabasePath(name);
 		Log.v("Database", path.getAbsolutePath());
-	    return SQLiteDatabase.openOrCreateDatabase(path, factory);
+	    return SQLiteDatabase.openDatabase(path.getPath(), factory,
+	    		SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
 	}
 }

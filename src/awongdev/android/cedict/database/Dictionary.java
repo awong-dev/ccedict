@@ -41,8 +41,12 @@ class Dictionary {
 			dictionaryOpener.close();
 			File oldDictionaryPath = applicationContext.getDatabasePath("dictionary");
 			Log.i(LOG_TAG, "Overwritting: " + oldDictionaryPath + " with " + newDictionaryPath);
+			oldDictionaryPath.delete();
+			newDictionaryPath.renameTo(oldDictionaryPath);
+			/*
 			DictionaryLoader loader = new DictionaryLoader();
 			loader.overwriteDatabaseFile(oldDictionaryPath, newDictionaryPath);
+			*/
 		} finally {
 			// We must have some sort of database or the app will crash.
 			dictionaryDatabase = dictionaryOpener.getReadableDatabase();

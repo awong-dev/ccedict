@@ -2,32 +2,39 @@ package awongdev.android.cedict.database;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import awongdev.android.cedict.database.DictionaryTaskManager.DictionaryTaskManagerInitListener;
+import android.os.Handler;
+import awongdev.android.cedict.database.DictionaryTaskManager.TaskProgressListener;
 
-class InitializeDatabasesTask extends AsyncTask<Void, Integer, Dictionary> {
-	private final DictionaryTaskManagerInitListener listener;
+class InitializeDatabasesTask extends AsyncTask<Void, String, Dictionary> {
+	private final TaskProgressListener<String, DictionaryTaskManager> listener;
 	private final Context context;
+	private final Handler handler;
 	
-	InitializeDatabasesTask(DictionaryTaskManagerInitListener listener, Context context) {
+	InitializeDatabasesTask(TaskProgressListener<String, DictionaryTaskManager> listener, Context context, Handler handler) {
 		this.listener = listener;
 		this.context = context;
+		this.handler = handler;
+	}
+	
+	@Override
+	protected void onPreExecute() {
+		listener.onBegin("Loading Databases...");	
 	}
 	
 	@Override
 	protected Dictionary doInBackground(Void... params) {
 		Dictionary dictionary = new Dictionary(context);
-		// TODO(awong): Set 100ms timer to show splash screen of initialize doesn't complete.
 		dictionary.initializeDatabases();
 		return dictionary;
 	}
 
 	@Override
-	protected void onProgressUpdate(Integer... progress) {
-		// listener.showInitializing();
+	protected void onProgressUpdate(String... progress) {
+		listener.onProgress(progress[0]);
 	}
 	
 	@Override
-	protected void onPostExecute(Dictionary d) {
-		listener.onInitialized(new DictionaryTaskManager(context, d));
+	protected void onPostExecute(Dictionary dictionary) {
+		listener.onComplete(new DictionaryTaskManager(context, dictionary, handler));
 	}
 }
