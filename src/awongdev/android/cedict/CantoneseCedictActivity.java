@@ -1,16 +1,25 @@
 package awongdev.android.cedict;
 
 
+import java.io.File;
+
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ListView;
 import awongdev.android.cedict.R;
+import awongdev.android.cedict.database.DatabaseUtil;
 import awongdev.android.cedict.database.DictionaryTaskManager;
 import awongdev.android.cedict.database.DictionaryTaskManager.DetailedProgress;
 import awongdev.android.cedict.database.DictionaryTaskManager.TaskProgressListener;
@@ -24,7 +33,7 @@ public class CantoneseCedictActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		handler = new Handler();
 		// TODO(awong): We should eagerly create the DTM and then have it attach its dictionary later.
-		DictionaryTaskManager.asyncCreate(new DTMInitListener(), getApplicationContext(), handler);
+		DictionaryTaskManager.asyncCreate(new DTMInitListener(), this, handler);
 	}
 
 	@Override
@@ -38,13 +47,10 @@ public class CantoneseCedictActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.Download:
+		case R.id.UpdateDictionary:
 			dictionaryTaskManager.doDownloadLatestDictionary(new DictionaryDownloadListener());
 			return true;
-		case R.id.FSLoad:
-			//downloadingDialog = ProgressDialog.show(this, "", "Loading...");
-			
-			return true;
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -85,7 +91,7 @@ public class CantoneseCedictActivity extends Activity {
 			EditText searchBox = (EditText) findViewById(R.id.SearchBox);
 			searchBox.addTextChangedListener(
 					new SearchBoxHandler(
-							getApplicationContext(), 
+							CantoneseCedictActivity.this, 
 							(ListView)findViewById(R.id.ResultPanel), 
 							dictionaryTaskManager));		
 		}
@@ -117,6 +123,7 @@ public class CantoneseCedictActivity extends Activity {
 			downloadDialog = new ProgressDialog(CantoneseCedictActivity.this);
             downloadDialog.setTitle("Update Dictionary");
 	        downloadDialog.setProgressStyle(currentStyle);
+	        downloadDialog.setCancelable(false);
 	        
 	        return true;
 		}
@@ -144,6 +151,32 @@ public class CantoneseCedictActivity extends Activity {
 		    if (needsShow) {
 		    	downloadDialog.show();
 		    }
+		}
+	}
+	
+	@Override
+	public synchronized File getDatabasePath(String name) {
+		return new File(DatabaseUtil.getDatabaseDir(this), name);
+	}
+	
+	@Override
+	public synchronized SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
+		return openOrCreateDatabase(name, mode, factory, null);
+	}
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	@Override
+	public SQLiteDatabase openOrCreateDatabase(String name, int mode,
+			CursorFactory factory, DatabaseErrorHandler errorHandler) {
+		File path = getDatabasePath(name);
+		Log.v("Database", path.getAbsolutePath());
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+		    return SQLiteDatabase.openDatabase(path.getPath(), factory,
+		    		SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
+		} else {
+		    return SQLiteDatabase.openDatabase(path.getPath(), factory,
+		    		SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.NO_LOCALIZED_COLLATORS,
+		    		errorHandler);
 		}
 	}
 }

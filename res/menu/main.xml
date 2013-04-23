@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     
-    <item android:id="@+id/Download" android:title="Download Dictionary" android:titleCondensed="Download" android:menuCategory="system"></item><item android:id="@+id/FSLoad" android:title="Load Dictionary File"></item>
+    <item android:id="@+id/UpdateDictionary" android:title="@string/update_dict" android:titleCondensed="@string/update_dict_short" android:menuCategory="system"></item>
     
 
 </menu>

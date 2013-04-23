@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +31,6 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 	private final int BUFFER_SIZE = 4096;
 	private final String BASE_URL = "http://awong-dev.github.io/ccedict/dictionaries/";
 	private final String DOWNLOAD_DIR = "downloaded";
-	private final Context context;
 	private final Dictionary dictionary;
 	private final TaskProgressListener<DetailedProgress, Void> listener;
 	private final File downloadDir;
@@ -40,7 +38,6 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 	public DownloadDatabaseTask(
 			Context context, Dictionary dictionary,
 			TaskProgressListener<DetailedProgress, Void> listener) {
-		this.context = context;
 		this.dictionary = dictionary;
 		this.listener = listener;
 		this.downloadDir = new File(DatabaseUtil.getDatabaseDir(context), DOWNLOAD_DIR);
@@ -65,6 +62,10 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			}
 			return null;
 		}
+		// If the current dictionary matches the digest, then we are already up to date.
+		if (isValidDictionary(dictionary.getDictionaryPath(), metadata)) {
+			return null;
+		}
 		File newDictionaryPath = downloadDictionary(metadata);
 		publishProgress(new DetailedProgress("Replacing Dictionary..."));
 		dictionary.replaceDictionary(newDictionaryPath);
@@ -72,6 +73,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 		downloadDir.delete();
 		return null;
 	}
+
 	@Override
 	protected void onProgressUpdate(DetailedProgress... progress) {
 		listener.onProgress(progress[0]);
@@ -243,19 +245,21 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 		return null;
 	}
 
-	private boolean isValidDictionary(File downloadPath, VersionMetadata metadata) {
+	private boolean isValidDictionary(File dictionaryPath, VersionMetadata metadata) {
 		InputStream instream = null;
 		try {
 			MessageDigest md = MessageDigest.getInstance(metadata.digest_type);
-			instream = new BufferedInputStream(new FileInputStream(downloadPath), BUFFER_SIZE);
+			instream = new BufferedInputStream(new FileInputStream(dictionaryPath), BUFFER_SIZE);
 			instream = new DigestInputStream(instream, md);
 			byte[] buffer = new byte[BUFFER_SIZE];
 			int bytesRead = 0;
 			int length;
-			int filesize = (int)downloadPath.length();
+			int filesize = (int)dictionaryPath.length();
 			while ((length = instream.read(buffer)) > 0) {
 				bytesRead += length;
-				publishProgress(new DetailedProgress("Verifying old file...", bytesRead, filesize));
+				publishProgress(
+						new DetailedProgress("Checking Current Dictionary...",
+								bytesRead, filesize));
 			}
 			
 			if (metadata.digest.equals(HexUtil.bytesToHex(md.digest()))) {

@@ -1,13 +1,7 @@
 package awongdev.android.cedict;
 
-import java.io.File;
-
 import android.app.Application;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.Build;
-import android.util.Log;
-import awongdev.android.cedict.database.DatabaseUtil;
 
 public class CantoneseCedictApplication extends Application {
 	public CantoneseCedictApplication() {
@@ -16,18 +10,5 @@ public class CantoneseCedictApplication extends Application {
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
 			System.setProperty("http.keepAlive", "false");
 		}
-	}
-	
-	@Override
-	public synchronized File getDatabasePath(String name) {
-		return new File(DatabaseUtil.getDatabaseDir(this), name);
-	}
-	
-	@Override
-	public synchronized SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory) {
-		File path = getDatabasePath(name);
-		Log.v("Database", path.getAbsolutePath());
-	    return SQLiteDatabase.openDatabase(path.getPath(), factory,
-	    		SQLiteDatabase.CREATE_IF_NECESSARY | SQLiteDatabase.NO_LOCALIZED_COLLATORS);
 	}
 }

@@ -11,5 +11,7 @@
     <string name="defn">Some word.</string>
     <string name="left_bracket">[m: </string>
     <string name="right_bracket">]</string>
+    <string name="update_dict">Update Dictionary</string>
+    <string name="update_dict_short">Update Dict</string>
 
 </resources>

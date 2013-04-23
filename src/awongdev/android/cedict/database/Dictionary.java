@@ -18,19 +18,19 @@ class Dictionary {
 	private SQLiteOpenHelper annotationsOpener;
 	private SQLiteDatabase dictionaryDatabase;
 	private SQLiteDatabase annotationsDatabase;
-	private final Context applicationContext;
+	private final Context context;
 
-	Dictionary(Context applicationContext) {
-		this.applicationContext = applicationContext;
+	Dictionary(Context context) {
+		this.context = context;
 	}
 	
 	public void initializeDatabases() {
 		Preconditions.IsNull(dictionaryOpener, "dictionary opener already initialized");
 		Preconditions.IsNull(annotationsOpener, "annotations opener already initialized");
 		annotationsOpener = 
-				new AnnotationsDatabaseOpenHelper("annotations", applicationContext);
+				new AnnotationsDatabaseOpenHelper("annotations", context);
 		dictionaryOpener =
-				new DictionaryDatabaseOpenHelper("dictionary", applicationContext);
+				new DictionaryDatabaseOpenHelper("dictionary", context);
 		
 		openDictionaryDatabase();
 		openAnnotationsDatabase();
@@ -39,7 +39,7 @@ class Dictionary {
 	public void replaceDictionary(File newDictionaryPath) {
 		try {
 			dictionaryOpener.close();
-			File oldDictionaryPath = applicationContext.getDatabasePath("dictionary");
+			File oldDictionaryPath = getDictionaryPath();
 			Log.i(LOG_TAG, "Overwritting: " + oldDictionaryPath + " with " + newDictionaryPath);
 			oldDictionaryPath.delete();
 			newDictionaryPath.renameTo(oldDictionaryPath);
@@ -52,23 +52,24 @@ class Dictionary {
 			dictionaryDatabase = dictionaryOpener.getReadableDatabase();
 		}
 	}
+
+	public File getDictionaryPath() {
+		return context.getDatabasePath("dictionary");
+	}
 	
 	public Cursor lookupTerm(String term, boolean isRoman) {
 		// Lookup Query.
 		final String[] COLUMNS = new String[] { "rowid _id", "entry", "simplified",
 				"variant", "trust", "cantonese", "pinyin", "definition" };
 		final String WHERE_ROMAN =
-				" (pinyin >= ? AND pinyin < ?)" +
-				" OR (extra_search >= ? AND extra_search < ?)";
+				" (pinyin >= ?1 AND pinyin < ?2)" +
+				" OR (extra_search >= ?1 AND extra_search < ?2)";
 		final String WHERE =
-				"(entry >= ? AND entry < ?)" +
-				" OR (variant >= ? AND variant < ?)";
+				"(entry >= ?1 AND entry < ?2)" +
+				" OR (variant >= ?1 AND variant < ?2)";
 		
 		String nextTerm = incrementTerm(term);
-		String[] selectorArgs = {
-				term, nextTerm,
-				term, nextTerm
-				};
+		String[] selectorArgs = { term, nextTerm };
 		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
 		lookupQuery.setTables("FlattenedEntries");
 		return lookupQuery.query(dictionaryDatabase, COLUMNS, isRoman ? WHERE_ROMAN : WHERE,
