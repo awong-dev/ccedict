@@ -258,8 +258,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			while ((length = instream.read(buffer)) > 0) {
 				bytesRead += length;
 				publishProgress(
-						new DetailedProgress("Checking Current Dictionary...",
-								bytesRead, filesize));
+						new DetailedProgress("Checking Current Dictionary...", bytesRead, filesize));
 			}
 			
 			if (metadata.digest.equals(HexUtil.bytesToHex(md.digest()))) {
