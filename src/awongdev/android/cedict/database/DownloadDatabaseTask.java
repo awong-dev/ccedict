@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import awongdev.android.cedict.CantoneseCedictApplication;
 import awongdev.android.cedict.HexUtil;
 import awongdev.android.cedict.database.DictionaryTaskManager.DetailedProgress;
 import awongdev.android.cedict.database.DictionaryTaskManager.TaskProgressListener;
@@ -40,7 +41,8 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			TaskProgressListener<DetailedProgress, Void> listener) {
 		this.dictionary = dictionary;
 		this.listener = listener;
-		this.downloadDir = new File(DatabaseUtil.getDatabaseDir(context), DOWNLOAD_DIR);
+		CantoneseCedictApplication appContext = (CantoneseCedictApplication) context.getApplicationContext();
+		this.downloadDir = new File(appContext.getDatabaseDir(), DOWNLOAD_DIR);
 	}
 
 	@Override
@@ -57,6 +59,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			Log.e(LOG_TAG, "Unable to load metadata", e);
 			publishProgress(new DetailedProgress("Error getting metadata!"));
 			try {
+				// Display the error for a few seconds.
 				Thread.sleep(5000);
 			} catch (InterruptedException e1) {
 			}
@@ -66,6 +69,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 		if (isValidDictionary(dictionary.getDictionaryPath(), metadata)) {
 			return null;
 		}
+
 		File newDictionaryPath = downloadDictionary(metadata);
 		publishProgress(new DetailedProgress("Replacing Dictionary..."));
 		dictionary.replaceDictionary(newDictionaryPath);
