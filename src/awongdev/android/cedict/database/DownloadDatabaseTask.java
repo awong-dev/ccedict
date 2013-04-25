@@ -274,7 +274,9 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			throw new RuntimeException(e);
 		} finally {
 			try {
-				instream.close();
+				if (instream != null) {
+					instream.close();
+				}
 			} catch (IOException e) {
 				Log.e(LOG_TAG, "Unable to close file", e);
 			}

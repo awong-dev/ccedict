@@ -92,6 +92,11 @@ public class CantoneseCedictApplication extends Application {
 
 	@TargetApi(Build.VERSION_CODES.FROYO)
 	private File ensureDatabaseDir() {
+		if (!shouldUseExternalStorage()) {
+			File path = super.getDatabasePath("dictionary");
+			return path.getParentFile();
+		}
+		
 		String storagePath;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
 			storagePath = Environment.getExternalStorageDirectory().getAbsolutePath()
@@ -102,6 +107,16 @@ public class CantoneseCedictApplication extends Application {
 		File newDatabaseDir = new File(storagePath + "/databases/");
 		newDatabaseDir.mkdirs();
 		return newDatabaseDir;
+	}
+	
+	private boolean shouldUseExternalStorage() {
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+		    // We can read and write the media
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private static class TaskProgressDispatcher<Progress, Result> implements TaskProgressListener<Progress, Result> {
