@@ -1,6 +1,6 @@
 {
-  "digest-type": "SHA-1_RSA",
-  "digest": "cb55827642334eddd9f6b7009a9342c7f57afd4031b3e21f2e3f8fc783b3d99764e4bcfc821dc10bd700c911f6237674de8fc7c6de486855cb88a4eea444c10f3b3a303d22d55ce4e71b3c2dc1f6d0fc8d841712bec7252fbb01f0c1015daaefc5fd8c3f12f240c7b8fc81a543ae47c8775a67ebd339989d79c69e1c698ea62b",
+  "digest-type": "SHA-1",
+  "digest": "8bc97a5364c80ec6f28b3febd431ce6481e81700",
   "format": "sqlite",
   "compression": "gzip",
   "filename": "ccedict-2013-04-20[8bc97a53].u8.db.gz"
