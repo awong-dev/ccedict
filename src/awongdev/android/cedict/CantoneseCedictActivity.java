@@ -7,23 +7,25 @@ package awongdev.android.cedict;
  *   - Ping periodically on updated dictionary.
  */
 
-import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.Loader;
 import android.app.ProgressDialog;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.EditText;
 import android.widget.ListView;
 import awongdev.android.cedict.R;
 import awongdev.android.cedict.database.DictionaryTaskManager;
 import awongdev.android.cedict.database.DictionaryTaskManager.DetailedProgress;
 import awongdev.android.cedict.database.DictionaryTaskManager.TaskProgressListener;
 
-public class CantoneseCedictActivity extends Activity {
+public class CantoneseCedictActivity extends FragmentActivity {
 	Handler handler;
 	private CantoneseCedictApplication applicationContext;
+	private DictionaryTaskManager dictionaryTaskManager;
 	private DictionaryDownloadListener downloadListener;
 	private DTMInitListener dtmInitListener;
 	
@@ -153,13 +155,8 @@ public class CantoneseCedictActivity extends Activity {
 			}
 			
 			// LIST VIEW
-			setContentView(R.layout.main);
-			EditText searchBox = (EditText) findViewById(R.id.SearchBox);
-			searchBox.addTextChangedListener(
-					new SearchBoxHandler(
-							CantoneseCedictActivity.this, 
-							(ListView)findViewById(R.id.ResultPanel), 
-							dtm));
+			setContentView(R.layout.activity_layout);
+			dictionaryTaskManager = dtm;
 			
 			// Remove ourselves so we can GCed.
 			applicationContext.detachDtmListener(this);
@@ -171,5 +168,21 @@ public class CantoneseCedictActivity extends Activity {
 				slowInitDialog = ProgressDialog.show(CantoneseCedictActivity.this, "", lastStatus);
 			}
 		}
+	}
+
+	public void doStatsLookup(ListView resultPanel) {
+		dictionaryTaskManager.doStatsLookup(resultPanel);
+	}
+
+	public void doLookup(String term, boolean is_roman, ListView resultPanel) {
+		dictionaryTaskManager.doLookup(term, is_roman, resultPanel);
+	}
+
+	public Loader<Cursor> createLookupStatsLoader() {
+		return dictionaryTaskManager.createLookupStatsLoader();
+	}
+
+	public Loader<Cursor> createLookupTermLoader(String term, boolean is_roman) {
+		return dictionaryTaskManager.createLookupTermLoader(term, is_roman);
 	}
 }

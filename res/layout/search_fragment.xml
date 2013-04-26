@@ -9,11 +9,10 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="textAutoComplete" />
-
-    <ListView
-        android:id="@+id/ResultPanel"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-    </ListView>
-
+    
+    <fragment android:name="android.support.v4.app.ListFragment"
+            android:id="@+id/ResultPanel"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dip" />
 </LinearLayout>

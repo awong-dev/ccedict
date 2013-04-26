@@ -25,7 +25,6 @@ public class LookupStatsTask extends AsyncTask<Void, Void, Cursor> {
 		return dictionary.lookupStats();
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onPostExecute(Cursor cursor) {
 		resultPanel.setAdapter(new SimpleCursorAdapter(

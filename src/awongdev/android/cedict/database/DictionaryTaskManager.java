@@ -3,7 +3,9 @@ package awongdev.android.cedict.database;
 import java.io.File;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
+import android.support.v4.content.Loader;
 import android.widget.ListView;
 
 /**
@@ -109,5 +111,23 @@ public class DictionaryTaskManager {
 			flashCardTask.cancel(true);
 			flashCardTask = null;
 		}
+	}
+
+	public Loader<Cursor> createLookupStatsLoader() {
+		return new SqliteCursorLoader(context) {
+			@Override
+			protected Cursor getCursor() {
+				return dictionary.lookupStats();
+			}
+		};
+	}
+
+	public Loader<Cursor> createLookupTermLoader(final String term, final boolean is_roman) {
+		return new SqliteCursorLoader(context) {
+			@Override
+			protected Cursor getCursor() {
+				return dictionary.lookupTerm(term, is_roman);
+			}
+		};
 	}
 }

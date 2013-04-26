@@ -2,20 +2,18 @@ package awongdev.android.cedict;
 
 import java.util.regex.Pattern;
 
-import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.ListView;
-import awongdev.android.cedict.database.DictionaryTaskManager;
 
 final class SearchBoxHandler implements TextWatcher {
 	private static final Pattern ALPHA_NUM = Pattern.compile("^[a-zA-Z0-9 ]+$");
 	private final ListView resultPanel;
-	private final DictionaryTaskManager dictionaryTaskManager;
+	private final CantoneseCedictActivity activity;
 	
-	public SearchBoxHandler(Context applicationContext, ListView resultPanel, DictionaryTaskManager dictionaryTaskManager) {
+	public SearchBoxHandler(ListView resultPanel, CantoneseCedictActivity activity) {
 		this.resultPanel = resultPanel;
-		this.dictionaryTaskManager = dictionaryTaskManager;
+		this.activity = activity;
 	}
 	
 	public void afterTextChanged(Editable s) {
@@ -25,7 +23,7 @@ final class SearchBoxHandler implements TextWatcher {
 		
 		// Special keyword to go to stats mode.
 		if (term.equals("hs")) {
-			dictionaryTaskManager.doStatsLookup(resultPanel);
+			activity.doStatsLookup(resultPanel);
 			return;
 		}
 		boolean is_roman = false;
@@ -35,7 +33,7 @@ final class SearchBoxHandler implements TextWatcher {
 				return;
 			is_roman = true;
 		}
-		dictionaryTaskManager.doLookup(term, is_roman, resultPanel);
+		activity.doLookup(term, is_roman, resultPanel);
 	}
 
 	public void beforeTextChanged(CharSequence arg0, int arg1,
