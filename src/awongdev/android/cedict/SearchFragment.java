@@ -16,22 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ListView;
 
 public class SearchFragment extends Fragment implements LoaderCallbacks<Cursor> {
 	private CantoneseCedictActivity activity;
 	private SimpleCursorAdapter currentAdapter;
 	private SimpleCursorAdapter statsAdapter;
 	private SimpleCursorAdapter termAdapter;
-	
-	private static final int[] STATS_TO_FIELDS = new int[] {
-		R.id.entry, R.id.variant, R.id.cantonese
-	};
-	private static final String[] STATS_VIEW_COLUMNS = 
-			new String[] {
-		"entry", "last_lookup", "num_lookups"
-	};
-		
 	
     @Override
     public void onAttach(Activity activity) {
@@ -66,6 +56,7 @@ public class SearchFragment extends Fragment implements LoaderCallbacks<Cursor> 
             Bundle savedInstanceState) {
     	View searchView = inflater.inflate(R.layout.search_fragment, container, false);
 		EditText searchBox = (EditText) searchView.findViewById(R.id.SearchBox);
+		getResultsList().setListShown(true);
 		searchBox.addTextChangedListener(
 				new SearchBoxHandler());
 		return searchView;
@@ -132,17 +123,24 @@ public class SearchFragment extends Fragment implements LoaderCallbacks<Cursor> 
 							bundle.getBoolean("isRoman"));
 			}
 		} finally {
-			ListFragment results = (ListFragment)getFragmentManager().findFragmentById(R.id.ResultPanel);
+			ListFragment results = getResultsList();
+			results.setListShown(false);
 			results.setListAdapter(currentAdapter);
 		}
 		return null;
 	}
-
+	
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-	    currentAdapter.swapCursor(data);
+		getResultsList().setListShown(true);
+		currentAdapter.swapCursor(data);
 	}
 
 	public void onLoaderReset(Loader<Cursor> loader) {
+		getResultsList().setListShown(true);
 		currentAdapter.swapCursor(null);
+	}
+	
+	private ListFragment getResultsList() {
+		return (ListFragment)getFragmentManager().findFragmentById(R.id.ResultPanel);
 	}
 }

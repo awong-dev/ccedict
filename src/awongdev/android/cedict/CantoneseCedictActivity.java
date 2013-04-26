@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ListView;
 import awongdev.android.cedict.R;
 import awongdev.android.cedict.database.DictionaryTaskManager;
 import awongdev.android.cedict.database.DictionaryTaskManager.DetailedProgress;
@@ -168,14 +167,6 @@ public class CantoneseCedictActivity extends FragmentActivity {
 				slowInitDialog = ProgressDialog.show(CantoneseCedictActivity.this, "", lastStatus);
 			}
 		}
-	}
-
-	public void doStatsLookup(ListView resultPanel) {
-		dictionaryTaskManager.doStatsLookup(resultPanel);
-	}
-
-	public void doLookup(String term, boolean is_roman, ListView resultPanel) {
-		dictionaryTaskManager.doLookup(term, is_roman, resultPanel);
 	}
 
 	public Loader<Cursor> createLookupStatsLoader() {

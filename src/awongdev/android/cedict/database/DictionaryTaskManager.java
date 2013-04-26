@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.support.v4.content.Loader;
-import android.widget.ListView;
 
 /**
  * This is the public API of the database package designed for use on the UI thread.
@@ -23,8 +22,6 @@ public class DictionaryTaskManager {
 	
 	// Outstanding tasks.
 	private UpdateStatsTask outstandingStatsUpdate;
-	private LookupTask outstandingLookup;
-	private LookupStatsTask flashCardTask;
 	
 	public static class DetailedProgress {
 		public DetailedProgress(String status) {
@@ -66,23 +63,6 @@ public class DictionaryTaskManager {
 	public void doLoadNewDictionary(final File newDictionaryPath) {
 		new OverwriteDictionaryTask(newDictionaryPath).execute(dictionary);
 	}
-
-	public void doLookup(final String term, boolean is_roman, ListView resultPanel) {
-		cancelOutstandingSearchTasks();
-		
-		outstandingLookup = new LookupTask(context, is_roman, resultPanel, dictionary);
-		outstandingLookup.execute(term);
-		if (!is_roman) {
-			doUpdateStats(term);
-		}
-	}
-
-	public void doStatsLookup(ListView resultPanel) {
-		cancelOutstandingSearchTasks();
-		
-		flashCardTask = new LookupStatsTask(context, resultPanel, dictionary);
-		flashCardTask.execute();
-	}
 	
 	// Increment lookup frequency.
 	private void doUpdateStats(final String term) {		
@@ -103,17 +83,10 @@ public class DictionaryTaskManager {
 			outstandingStatsUpdate.cancel(true);
 			outstandingStatsUpdate = null;
 		}
-		if (outstandingLookup != null) {
-			outstandingLookup.cancel(true);
-			outstandingLookup = null;
-		}
-		if (flashCardTask != null) {
-			flashCardTask.cancel(true);
-			flashCardTask = null;
-		}
 	}
 
 	public Loader<Cursor> createLookupStatsLoader() {
+		cancelOutstandingSearchTasks();
 		return new SqliteCursorLoader(context) {
 			@Override
 			protected Cursor getCursor() {
@@ -123,6 +96,10 @@ public class DictionaryTaskManager {
 	}
 
 	public Loader<Cursor> createLookupTermLoader(final String term, final boolean is_roman) {
+		cancelOutstandingSearchTasks();
+		if (!is_roman) {
+			doUpdateStats(term);
+		}
 		return new SqliteCursorLoader(context) {
 			@Override
 			protected Cursor getCursor() {
