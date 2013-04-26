@@ -38,10 +38,6 @@ class DictionaryDatabaseOpenHelper extends SQLiteOpenHelper {
           db.endTransaction();
         }
     }
-    
-    public void onOpen(SQLiteDatabase db) {
-    	Log.e(LOG_TAG, "onOpen");
-    }
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int from_version, int to_version) {

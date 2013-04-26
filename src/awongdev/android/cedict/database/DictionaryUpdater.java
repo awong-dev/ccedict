@@ -16,7 +16,7 @@ class DictionaryUpdater{
 		database = db;
 	}
 
-	public void updateFromCcedict(String sourceId, BufferedReader reader) throws IOException {
+	void updateFromCcedict(String sourceId, BufferedReader reader) throws IOException {
 		database.beginTransaction();
 		try {
 			updateFromReaderInternal(sourceId, reader);
@@ -26,7 +26,7 @@ class DictionaryUpdater{
 		}
 	}
 	
-	public void replaceWithSqlDump(BufferedReader reader) throws IOException {
+	void replaceWithSqlDump(BufferedReader reader) throws IOException {
 		try {
 			database.beginTransaction();
 			try { database.execSQL("DROP TABLE FlattenedEntries;"); } catch (SQLException e) {}
@@ -41,7 +41,7 @@ class DictionaryUpdater{
 		}
 	}
 	
-	private void upsertDefinitions(long source_id, long entry_id,
+	void upsertDefinitions(long source_id, long entry_id,
 			ArrayList<ArrayList<String>> definitions) {
 		database.delete("Definitions", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -59,7 +59,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	private void upsertPinyin(long source_id, long entry_id,
+	void upsertPinyin(long source_id, long entry_id,
 			ArrayList<String> pinyin) {
 		database.delete("Pinyin", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -73,7 +73,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	private void upsertJyutping(long source_id, long entry_id,
+	void upsertJyutping(long source_id, long entry_id,
 			ArrayList<String> jyutping) {
 		database.delete("Jyutping", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -87,7 +87,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	public void upsertEntry(long source_id, String entry,
+	void upsertEntry(long source_id, String entry,
 			ArrayList<ArrayList<String>> definitions, ArrayList<String> pinyin, ArrayList<String> jyutping) {
 		assert(database.inTransaction());
 		Cursor cursor = database.query("Entries", new String[] {"entry_id"}, "entry = ?", 
@@ -113,7 +113,7 @@ class DictionaryUpdater{
 	}
 	
 	// If the name is unknown, returns -1.
-	public long sourceIdForName(String name) {
+	long sourceIdForName(String name) {
 		Cursor cursor = database.query("Sources", new String[] {"source_id"}, "source_name = ?",
 				new String[] { name }, null, null, null);
 		cursor.moveToFirst();
@@ -127,7 +127,7 @@ class DictionaryUpdater{
 		return source_id;
 	}
 	
-	public static enum TrustLevel {
+	static enum TrustLevel {
 		FULL_TRUST(1),
 		PARTIAL_TRUST(2),
 		DISTRUST(3),
@@ -141,7 +141,7 @@ class DictionaryUpdater{
 		}
 	}
 	
-	public long addSource(String name, TrustLevel trust) {
+	long addSource(String name, TrustLevel trust) {
 		Cursor cursor = database.query("Sources", new String[] {"max(priority)"}, "priority not in (1999999, 999999)",
 				null, null, null, null);
 		cursor.moveToFirst();
@@ -153,7 +153,7 @@ class DictionaryUpdater{
 		return addSource(name, max_priority, trust);
 	}
 
-	public long addSource(String name, long priority, TrustLevel trust) {
+	long addSource(String name, long priority, TrustLevel trust) {
 		ContentValues source_entry = new ContentValues();
 		source_entry.put("source_name", name);
 		source_entry.put("priority", priority);
@@ -168,7 +168,7 @@ class DictionaryUpdater{
 		return source_id;
 	}
 	
-	public void addSource(String name, long priority, TrustLevel trust, int source_id) {
+	void addSource(String name, long priority, TrustLevel trust, int source_id) {
 		ContentValues source_entry = new ContentValues();
 		source_entry.put("source_id", source_id);
 		source_entry.put("source_name", name);
@@ -192,11 +192,11 @@ class DictionaryUpdater{
 				+ ", UNIQUE (entry_id)" + ")");
 	}
 
-	static enum EntrySection {
+	enum EntrySection {
 		TRAD, SIMP, CANT, MAND, DEFN
 	}
 	
-	private void updateFromReaderInternal(String sourceId, BufferedReader reader) throws IOException {
+	void updateFromReaderInternal(String sourceId, BufferedReader reader) throws IOException {
 		String line = null;
 		
 		long source_id = sourceIdForName(sourceId);

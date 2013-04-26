@@ -24,7 +24,7 @@ class Dictionary {
 		this.context = context;
 	}
 	
-	public void initializeDatabases() {
+	void initializeDatabases() {
 		Preconditions.IsNull(dictionaryOpener, "dictionary opener already initialized");
 		Preconditions.IsNull(annotationsOpener, "annotations opener already initialized");
 		annotationsOpener = 
@@ -36,7 +36,7 @@ class Dictionary {
 		openAnnotationsDatabase();
 	}
 	
-	public void replaceDictionary(File newDictionaryPath) {
+	void replaceDictionary(File newDictionaryPath) {
 		try {
 			dictionaryOpener.close();
 			File oldDictionaryPath = getDictionaryPath();
@@ -53,11 +53,11 @@ class Dictionary {
 		}
 	}
 
-	public File getDictionaryPath() {
+	File getDictionaryPath() {
 		return context.getDatabasePath("dictionary");
 	}
 	
-	public Cursor lookupTerm(String term, boolean isRoman) {
+	Cursor lookupTerm(String term, boolean isRoman) {
 		// Lookup Query.
 		final String[] COLUMNS = new String[] { "rowid _id", "entry", "simplified",
 				"variant", "trust", "cantonese", "pinyin", "definition" };
@@ -76,7 +76,7 @@ class Dictionary {
 				selectorArgs, null, null, null);
 	}
 	
-	public Cursor lookupStats() {
+	Cursor lookupStats() {
 		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
 		lookupQuery.setTables("Annotations");
 		
@@ -85,7 +85,7 @@ class Dictionary {
 				null, null, null, "num_lookups desc, last_lookup desc");
 	}
 
-	public void recordTermLookup(String term) {
+	void recordTermLookup(String term) {
 		try {
 			annotationsDatabase.beginTransaction();
 			Cursor cursor = annotationsDatabase.query("Annotations",

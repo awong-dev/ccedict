@@ -25,6 +25,7 @@ public class LookupStatsTask extends AsyncTask<Void, Void, Cursor> {
 		return dictionary.lookupStats();
 	}
 	
+	@Override
 	protected void onPostExecute(Cursor cursor) {
 		resultPanel.setAdapter(new SimpleCursorAdapter(
 				applicationContext, R.layout.entry_layout, cursor,
