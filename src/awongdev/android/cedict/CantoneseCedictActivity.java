@@ -3,8 +3,9 @@ package awongdev.android.cedict;
 /**
  * TODO:
  *   - RSA signature
- *   - Fragments for Loading and ListView.
  *   - Ping periodically on updated dictionary.
+ *   - DTM does too many bounces for creating loader. People should have
+ *     access to DTM directly which means it shouldn't lazy load.
  */
 
 import android.support.v4.app.FragmentActivity;
