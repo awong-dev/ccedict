@@ -57,30 +57,41 @@ class Dictionary {
 		return context.getDatabasePath("dictionary");
 	}
 	
-	Cursor lookupTerm(String term, boolean isRoman) {
+	private static class LookupTermSql {
 		// Lookup Query.
-		final String[] COLUMNS = new String[] { "rowid _id", "entry", "simplified",
+		static final String[] COLUMNS = new String[] { "rowid _id", "entry", "simplified",
 				"variant", "trust", "cantonese", "pinyin", "definition" };
-		final String WHERE_ROMAN =
+		static final String WHERE_ROMAN =
 				" (pinyin >= ?1 AND pinyin < ?2)" +
 				" OR (extra_search >= ?1 AND extra_search < ?2)";
-		final String WHERE =
+		static final String WHERE =
 				"(entry >= ?1 AND entry < ?2)" +
 				" OR (variant >= ?1 AND variant < ?2)";
-		
+		static final SQLiteQueryBuilder builder;
+		static {
+			builder = new SQLiteQueryBuilder();
+			builder.setTables("FlattenedEntries");
+		}
+	}
+	
+	Cursor lookupTerm(String term, boolean isRoman) {
 		String nextTerm = incrementTerm(term);
 		String[] selectorArgs = { term, nextTerm };
-		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
-		lookupQuery.setTables("FlattenedEntries");
-		return lookupQuery.query(dictionaryDatabase, COLUMNS, isRoman ? WHERE_ROMAN : WHERE,
+		return LookupTermSql.builder.query(dictionaryDatabase,
+				LookupTermSql.COLUMNS, isRoman ? LookupTermSql.WHERE_ROMAN : LookupTermSql.WHERE,
 				selectorArgs, null, null, null);
 	}
 	
+	static class LookupStatsSql {
+		static SQLiteQueryBuilder builder;
+		static {
+			builder = new SQLiteQueryBuilder();
+			builder.setTables("Annotations");
+		}
+				
+	}
 	Cursor lookupStats() {
-		SQLiteQueryBuilder lookupQuery = new SQLiteQueryBuilder();
-		lookupQuery.setTables("Annotations");
-		
-		return lookupQuery.query(annotationsDatabase,
+		return LookupStatsSql.builder.query(annotationsDatabase,
 				new String[] {"rowid _id", "entry", "num_lookups", "last_lookup"}, "",
 				null, null, null, "num_lookups desc, last_lookup desc");
 	}

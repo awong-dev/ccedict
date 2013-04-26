@@ -1,21 +1,29 @@
 package awongdev.android.cedict.database;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
 class DictionaryUpdater{
-	private SQLiteDatabase database;
-
 	DictionaryUpdater(SQLiteDatabase db) {
-		database = db;
+	}
+	
+	static void createSchema(SQLiteDatabase database) {
+		database.execSQL("CREATE TABLE FlattenedEntries (entry TEXT NOT NULL"
+				+ ", simplified TEXT"
+				+ ", variant TEXT"
+				+ ", trust INTEGER NOT NULL"
+				+ ", cantonese TEXT"
+				+ ", pinyin TEXT"
+				+ ", definition TEXT"
+				+ ", extra_search TEXT"
+				+ ", UNIQUE (entry)"
+				+ ");");
+		database.execSQL("CREATE INDEX FlattenedEntries_extra_search on FlattenedEntries (extra_search);");
+		database.execSQL("CREATE INDEX FlattenedEntries_pinyin on FlattenedEntries (pinyin);");
+		database.execSQL("CREATE INDEX FlattenedEntries_simplified on FlattenedEntries (simplified);");
+		database.execSQL("CREATE INDEX FlattenedEntries_variant on FlattenedEntries (variant);");
 	}
 
+	/*
 	void updateFromCcedict(String sourceId, BufferedReader reader) throws IOException {
 		database.beginTransaction();
 		try {
@@ -41,7 +49,7 @@ class DictionaryUpdater{
 		}
 	}
 	
-	void upsertDefinitions(long source_id, long entry_id,
+	private void upsertDefinitions(long source_id, long entry_id,
 			ArrayList<ArrayList<String>> definitions) {
 		database.delete("Definitions", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -59,7 +67,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	void upsertPinyin(long source_id, long entry_id,
+	private void upsertPinyin(long source_id, long entry_id,
 			ArrayList<String> pinyin) {
 		database.delete("Pinyin", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -73,7 +81,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	void upsertJyutping(long source_id, long entry_id,
+	private void upsertJyutping(long source_id, long entry_id,
 			ArrayList<String> jyutping) {
 		database.delete("Jyutping", "entry_id = ? and source_id = ?",
 				new String[] {Long.toString(entry_id), Long.toString(source_id)});
@@ -87,7 +95,7 @@ class DictionaryUpdater{
 		}
 	}
 
-	void upsertEntry(long source_id, String entry,
+	private void upsertEntry(long source_id, String entry,
 			ArrayList<ArrayList<String>> definitions, ArrayList<String> pinyin, ArrayList<String> jyutping) {
 		assert(database.inTransaction());
 		Cursor cursor = database.query("Entries", new String[] {"entry_id"}, "entry = ?", 
@@ -113,7 +121,7 @@ class DictionaryUpdater{
 	}
 	
 	// If the name is unknown, returns -1.
-	long sourceIdForName(String name) {
+	private long sourceIdForName(String name) {
 		Cursor cursor = database.query("Sources", new String[] {"source_id"}, "source_name = ?",
 				new String[] { name }, null, null, null);
 		cursor.moveToFirst();
@@ -127,7 +135,7 @@ class DictionaryUpdater{
 		return source_id;
 	}
 	
-	static enum TrustLevel {
+	private static enum TrustLevel {
 		FULL_TRUST(1),
 		PARTIAL_TRUST(2),
 		DISTRUST(3),
@@ -141,7 +149,7 @@ class DictionaryUpdater{
 		}
 	}
 	
-	long addSource(String name, TrustLevel trust) {
+	private long addSource(String name, TrustLevel trust) {
 		Cursor cursor = database.query("Sources", new String[] {"max(priority)"}, "priority not in (1999999, 999999)",
 				null, null, null, null);
 		cursor.moveToFirst();
@@ -153,7 +161,7 @@ class DictionaryUpdater{
 		return addSource(name, max_priority, trust);
 	}
 
-	long addSource(String name, long priority, TrustLevel trust) {
+	private long addSource(String name, long priority, TrustLevel trust) {
 		ContentValues source_entry = new ContentValues();
 		source_entry.put("source_name", name);
 		source_entry.put("priority", priority);
@@ -168,7 +176,7 @@ class DictionaryUpdater{
 		return source_id;
 	}
 	
-	void addSource(String name, long priority, TrustLevel trust, int source_id) {
+	private void addSource(String name, long priority, TrustLevel trust, int source_id) {
 		ContentValues source_entry = new ContentValues();
 		source_entry.put("source_id", source_id);
 		source_entry.put("source_name", name);
@@ -177,26 +185,10 @@ class DictionaryUpdater{
 		database.insertOrThrow("Sources", null, source_entry);
 	}
 	
-	void createSchema() {
-		database.execSQL("CREATE TABLE Entries (entry_id INTEGER PRIMARY KEY AUTOINCREMENT, entry TEXT NOT NULL"
-				+ ", UNIQUE(entry))");
-		database.execSQL("CREATE TABLE FlattenedEntries (entry_id INTEGER NOT NULL"
-				+ ", entry TEXT NOT NULL"
-				+ ", variant TEXT NOT NULL"
-				+ ", trust INTEGER NOT NULL"
-				+ ", cantonese TEXT NOT NULL"
-				+ ", pinyin TEXT NOT NULL"
-				+ ", definition TEXT NOT NULL"
-				+ ", extra_search TEXT"
-				+ ", FOREIGN KEY (entry_id) REFERENCES Entries(entry_id)"
-				+ ", UNIQUE (entry_id)" + ")");
-	}
-
 	enum EntrySection {
 		TRAD, SIMP, CANT, MAND, DEFN
 	}
-	
-	void updateFromReaderInternal(String sourceId, BufferedReader reader) throws IOException {
+	private void updateFromReaderInternal(String sourceId, BufferedReader reader) throws IOException {
 		String line = null;
 		
 		long source_id = sourceIdForName(sourceId);
@@ -285,6 +277,6 @@ class DictionaryUpdater{
 			upsertEntry(source_id, traditional, definitions, pinyin, jyutping);
 			upsertEntry(source_id, simplified, definitions, pinyin, jyutping);
 		}
-	}
+	}*/
 
 }

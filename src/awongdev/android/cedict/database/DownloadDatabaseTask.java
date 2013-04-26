@@ -191,6 +191,7 @@ public class DownloadDatabaseTask extends AsyncTask<Void, DetailedProgress, File
 			publishProgress(new DetailedProgress("Downloading...", 0, contentLength));
 			
 			MessageDigest md = MessageDigest.getInstance(metadata.digest_type);
+			@SuppressWarnings("resource")
 			CountingInputStream countingStream = new CountingInputStream(urlConnection.getInputStream());
 			instream = countingStream;
 	

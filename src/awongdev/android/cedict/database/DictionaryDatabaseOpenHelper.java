@@ -29,8 +29,7 @@ class DictionaryDatabaseOpenHelper extends SQLiteOpenHelper {
     	Log.e(LOG_TAG, "onCreate");
         db.beginTransaction();
         try {
-            DictionaryUpdater updater = new DictionaryUpdater(db);
-            updater.createSchema();
+            DictionaryUpdater.createSchema(db);
 	        db.setTransactionSuccessful();
         } catch (RuntimeException e) {
         	Log.e(LOG_TAG, "Failed creating schmea. Continiuing anyways hopig we don't crash.", e);
